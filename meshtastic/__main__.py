@@ -1031,7 +1031,16 @@ def onConnected(interface):
                     tunnel.Tunnel(interface, subnet=args.tunnel_net)
                 else:
                     tunnel.Tunnel(interface)
-
+                    
+        if args.aprs:
+            from . import aprs
+            closeNow = False
+            aprs.APRS(
+                args.kiss_host,
+                args.kiss_port
+            )
+            
+            
         if args.ack or (args.dest != BROADCAST_ADDR and waitForAckNak):
             print(
                 f"Waiting for an acknowledgment from remote node (this could take a while)"
@@ -1366,6 +1375,7 @@ def common():
                 or args.reply
                 or (have_tunnel and args.tunnel)
                 or args.listen
+                or args.aprs
             ):  # loop until someone presses ctrlc
                 try:
                     while True:
@@ -2074,6 +2084,7 @@ def initParser():
     remoteHardwareArgs.add_argument(
         "--gpio-watch", help="Start watching a GPIO mask for changes (ex: '0x10')"
     )
+    
 
     have_tunnel = platform.system() == "Linux"
     if have_tunnel:
@@ -2091,6 +2102,27 @@ def initParser():
             help="Sets the local-end subnet address for the TUN IP bridge. (ex: 10.115' which is the default)",
             default=None,
         )
+        
+    kissArgs = parser.add_argument_group(
+        "APRS", "Arguments related to APRS relaying"
+    )
+    kissArgs.add_argument(
+        "--aprs",
+        action="store_true",
+        help="Convert tracker messages to APRS",
+    )
+    kissArgs.add_argument(
+        "--kiss-host",
+        help="Sets the host name for the KISS TNC. (defaults to 'localhost')",
+        default="127.0.0.1",
+    )
+    kissArgs.add_argument(
+        "--kiss-port",
+        help="Sets the port number for the KISS TNC. (defaults to 8000)",
+        default=8001,
+        type=int,
+    )
+    
 
     parser.set_defaults(deprecated=None)
 
