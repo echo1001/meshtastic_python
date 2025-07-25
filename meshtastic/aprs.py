@@ -46,7 +46,6 @@ def ax25(source: str, source_ssid: int, data: str) -> bytes:
     destination_bytes[6] = (destination_ssid & 0xf) << 1
     destination_bytes[6] |= RR_MASK | SSID_H_MASK
 
-    source = "W0ECO"
     source_bytes = bytearray([64] * 7)
     source_encoded = bytearray(source.encode('ascii'))
     for i in range(len(source_encoded)):
