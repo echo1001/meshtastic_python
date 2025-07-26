@@ -174,62 +174,66 @@ class APRS:
             self.sock = None
         
     def onReceive(self, packet, interface):
-        # print(packet)
-        
-        position = tracker_pb2.Tracker.FromString(packet["decoded"]["payload"])
-        # print(position)
-        
-        
-        lat = position.latitude_i * 1e-7
-        lon = position.longitude_i * 1e-7
+        try:
+            # print(packet)
+            
+            position = tracker_pb2.Tracker.FromString(packet["decoded"]["payload"])
+            # print(position)
+            
+            
+            lat = position.latitude_i * 1e-7
+            lon = position.longitude_i * 1e-7
 
-        latdeg = int(lat)
-        latmin = (lat - latdeg) * 60
+            latdeg = int(lat)
+            latmin = (lat - latdeg) * 60
 
-        londeg = int(lon)
-        lonmin = (lon - londeg) * 60
+            londeg = int(lon)
+            lonmin = (lon - londeg) * 60
 
-        # print(latmin, lonmin)
-        # print(position)
+            # print(latmin, lonmin)
+            # print(position)
 
-        latminB = (abs(latmin) * 1000) % 10
-        latminB = int(latminB)
-        latminB = f"{latminB:01d}"
+            latminB = (abs(latmin) * 1000) % 10
+            latminB = int(latminB)
+            latminB = f"{latminB:01d}"
 
-        lonminB = (abs(lonmin) * 1000) % 10
-        lonminB = int(lonminB)
-        lonminB = f"{lonminB:01d}"
+            lonminB = (abs(lonmin) * 1000) % 10
+            lonminB = int(lonminB)
+            lonminB = f"{lonminB:01d}"
 
-        lat_str = f"{abs(latdeg):02d}{abs(latmin):05.2f}{'N' if lat >= 0 else 'S'}"
-        lon_str = f"{abs(londeg):03d}{abs(lonmin):05.2f}{'E' if lon >= 0 else 'W'}"
-        
-        altitude = position.altitude
-        # Convert meters to feet 
-        altitude = int(altitude * 3.28084)
-        # /A=aaaaaa
-        altitude_str = f"/A={altitude:06d}"
-        
-        speed = position.ground_speed
-        # speed *= 0
-        # Convert speed km/h to knots
-        speed_knots = int(speed / 1.852)
-        
-        heading = position.ground_track
-        heading *= 1e-05
-        heading = int(heading)
-        
-        speed_heading_str = f"{heading:03d}/{speed_knots:03d}"
-        
-        
-        voltage = f"V{position.voltage:.3f} "
-        utilization = f"U{int(position.channel_utilization)} "
-        temperature = f"T{position.temperature:.2f} "
-        humidity = f"H{position.relative_humidity:.2f} "
-        pressure = f"P{position.barometric_pressure:.2f} "
+            lat_str = f"{abs(latdeg):02d}{abs(latmin):05.2f}{'N' if lat >= 0 else 'S'}"
+            lon_str = f"{abs(londeg):03d}{abs(lonmin):05.2f}{'E' if lon >= 0 else 'W'}"
+            
+            altitude = position.altitude
+            # Convert meters to feet 
+            altitude = int(altitude * 3.28084)
+            # /A=aaaaaa
+            altitude_str = f"/A={altitude:06d}"
+            
+            speed = position.ground_speed
+            # speed *= 0
+            # Convert speed km/h to knots
+            speed_knots = int(speed / 1.852)
+            
+            heading = position.ground_track
+            heading *= 1e-05
+            heading = int(heading)
+            
+            speed_heading_str = f"{heading:03d}/{speed_knots:03d}"
+            
+            
+            voltage = f"V{position.voltage:.3f} "
+            utilization = f"U{int(position.channel_utilization)} "
+            temperature = f"T{position.temperature:.2f} "
+            humidity = f"H{position.relative_humidity:.2f} "
+            pressure = f"P{position.barometric_pressure:.2f} "
 
-        aprs_str = f"!{lat_str}/{lon_str}O{speed_heading_str}{altitude_str} {voltage}{utilization}{temperature}{humidity}{pressure}S{position.sats_in_view}!W{latminB}{lonminB}!"
+            aprs_str = f"!{lat_str}/{lon_str}O{speed_heading_str}{altitude_str} {voltage}{utilization}{temperature}{humidity}{pressure}S{position.sats_in_view}!W{latminB}{lonminB}!"
 
-        
-        data = ax25(position.call_sign, position.ssid, aprs_str)
-        data = encapsulate(data, self.channel)
-        self.send_data(data)
+            
+            data = ax25(position.call_sign, position.ssid, aprs_str)
+            data = encapsulate(data, self.channel)
+            self.send_data(data)
+        except Exception as e:
+            logging.error(f"Error processing received packet: {e}")
+            logging.info(f"Packet data: {packet}")
