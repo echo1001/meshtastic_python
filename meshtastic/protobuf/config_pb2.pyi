@@ -299,6 +299,12 @@ class Config(google.protobuf.message.Message):
             Non-notification system buzzer tones only.
             Buzzer is enabled only for non-notification tones such as button presses, startup, shutdown, but not for alerts.
             """
+            DIRECT_MSG_ONLY: Config.DeviceConfig._BuzzerMode.ValueType  # 4
+            """
+            Direct Message notifications only.
+            Buzzer is enabled only for direct messages and alerts, but not for button presses.
+            External notification config determines the specifics of the notification behavior.
+            """
 
         class BuzzerMode(_BuzzerMode, metaclass=_BuzzerModeEnumTypeWrapper):
             """
@@ -325,6 +331,12 @@ class Config(google.protobuf.message.Message):
         """
         Non-notification system buzzer tones only.
         Buzzer is enabled only for non-notification tones such as button presses, startup, shutdown, but not for alerts.
+        """
+        DIRECT_MSG_ONLY: Config.DeviceConfig.BuzzerMode.ValueType  # 4
+        """
+        Direct Message notifications only.
+        Buzzer is enabled only for direct messages and alerts, but not for button presses.
+        External notification config determines the specifics of the notification behavior.
         """
 
         ROLE_FIELD_NUMBER: builtins.int
@@ -1368,8 +1380,6 @@ class Config(google.protobuf.message.Message):
             """
             Philippines 915mhz
             """
-<<<<<<< HEAD
-=======
             ANZ_433: Config.LoRaConfig._RegionCode.ValueType  # 22
             """
             Australia / New Zealand 433MHz
@@ -1390,7 +1400,6 @@ class Config(google.protobuf.message.Message):
             """
             Brazil 902MHz
             """
->>>>>>> 0dd0634 (Add Tracker to APRS)
 
         class RegionCode(_RegionCode, metaclass=_RegionCodeEnumTypeWrapper): ...
         UNSET: Config.LoRaConfig.RegionCode.ValueType  # 0
@@ -1481,8 +1490,6 @@ class Config(google.protobuf.message.Message):
         """
         Philippines 915mhz
         """
-<<<<<<< HEAD
-=======
         ANZ_433: Config.LoRaConfig.RegionCode.ValueType  # 22
         """
         Australia / New Zealand 433MHz
@@ -1503,7 +1510,6 @@ class Config(google.protobuf.message.Message):
         """
         Brazil 902MHz
         """
->>>>>>> 0dd0634 (Add Tracker to APRS)
 
         class _ModemPreset:
             ValueType = typing.NewType("ValueType", builtins.int)
