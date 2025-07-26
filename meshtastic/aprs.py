@@ -14,10 +14,10 @@ FESC = 0xDB
 TFEND = 0xDC
 TFESC = 0xDD
 
-def encapsulate(data: bytes) -> bytes:
+def encapsulate(data: bytes, channel) -> bytes:
     out = bytearray()
     out.append(FEND)
-    out.append(0)
+    out.append((channel & 0x0F) << 4)
     for byte in data:
         if byte == FEND:
             out.append(FESC)
@@ -53,19 +53,27 @@ def ax25(source: str, source_ssid: int, data: str) -> bytes:
     source_bytes[6] = (10 & 0xf) << 1
     source_bytes[6] |= RR_MASK
     
-    repeater = "WIDE2"
+    repeater = "WIDE1"
     repeater_bytes = bytearray([64] * 7)
     repeater_encoded = bytearray(repeater.encode('ascii'))
     for i in range(len(repeater_encoded)):
         repeater_bytes[i] = repeater_encoded[i] << 1
-    repeater_bytes[6] = (2 & 0xf) << 1
-    repeater_bytes[6] |= RR_MASK | SSID_LAST_MASK
+    repeater_bytes[6] = (1 & 0xf) << 1
+    repeater_bytes[6] |= RR_MASK
+
+    repeater2 = "WIDE2"
+    repeater2_bytes = bytearray([64] * 7)
+    repeater2_encoded = bytearray(repeater2.encode('ascii'))
+    for i in range(len(repeater2_encoded)):
+        repeater2_bytes[i] = repeater2_encoded[i] << 1
+    repeater2_bytes[6] = (2 & 0xf) << 1
+    repeater2_bytes[6] |= RR_MASK | SSID_LAST_MASK
 
     control_bytes = bytearray([AX25_UI_FRAME, AX25_PID_NO_LAYER_3])
 
     data_bytes = bytearray(data.encode('ascii'))
 
-    payload = destination_bytes + source_bytes + repeater_bytes + control_bytes + data_bytes
+    payload = destination_bytes + source_bytes + repeater_bytes + repeater2_bytes + control_bytes + data_bytes
     return bytes(payload)
     
 def onReceive(packet, interface):
@@ -78,7 +86,7 @@ class APRS:
             self.message = message
             super().__init__(self.message)
 
-    def __init__(self, host, port) -> None:
+    def __init__(self, host, port, channel) -> None:
         """
         Constructor
 
@@ -86,6 +94,7 @@ class APRS:
         """
         self.port = port
         self.host = host
+        self.channel = channel
         self.sock = None
         self.running = False
         self.reconnect_delay = 5  # seconds
@@ -222,5 +231,5 @@ class APRS:
 
         
         data = ax25(position.call_sign, position.ssid, aprs_str)
-        data = encapsulate(data)
+        data = encapsulate(data, self.channel)
         self.send_data(data)

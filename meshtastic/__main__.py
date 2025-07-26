@@ -1037,7 +1037,8 @@ def onConnected(interface):
             closeNow = False
             aprs.APRS(
                 args.kiss_host,
-                args.kiss_port
+                args.kiss_port,
+                args.kiss_channel
             )
             
             
@@ -2120,6 +2121,12 @@ def initParser():
         "--kiss-port",
         help="Sets the port number for the KISS TNC. (defaults to 8000)",
         default=8001,
+        type=int,
+    )
+    kissArgs.add_argument(
+        "--kiss-channel",
+        help="Sets the channel number for the KISS TNC. (defaults to 0)",
+        default=0,
         type=int,
     )
     
